@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="pref_location_update_min_interval"
+        android:title="Intervalle de rafrachaichissement de la localisation géographique"
+        android:defaultValue="30000" />
+    
+</PreferenceScreen>
