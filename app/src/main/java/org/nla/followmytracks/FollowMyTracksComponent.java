@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.location.Geocoder;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 import com.squareup.otto.Bus;
 
@@ -15,7 +16,6 @@ import org.nla.followmytracks.settings.SettingsActivity;
 import org.nla.followmytracks.workout.run.NewLocationNotificationRunnable;
 import org.nla.followmytracks.workout.start.CreateWorkoutRunnable;
 import org.nla.followmytracks.workout.start.ReverseGeocodeLocationRunnable;
-import org.nla.followmytracks.workout.start.TestRunnable;
 
 import javax.inject.Singleton;
 
@@ -53,8 +53,6 @@ public interface FollowMyTracksComponent {
 
     void inject(NewLocationNotificationRunnable newLocationNotificationRunnable);
 
-    void inject(TestRunnable testRunnable);
-
     void inject(ReverseGeocodeLocationRunnable reverseGeocodeLocationRunnable);
 
     Application application();
@@ -72,4 +70,6 @@ public interface FollowMyTracksComponent {
     Geocoder geocoder();
 
     Context context();
+
+    GoogleApiClient googleApiClient();
 }

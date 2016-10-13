@@ -1,6 +1,6 @@
 package org.nla.followmytracks.workout.start;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.location.places.Place;
 
 import org.nla.followmytracks.core.BusPresenter;
 
@@ -10,10 +10,9 @@ public interface StartWorkoutPresenter extends BusPresenter {
 
     void startWorkout(
             List<String> strings,
-            double latitude,
-            double longitude,
             double minDistanceBetweenTwoPoints
     );
     String getWorkoutName();
-    void reverseGeocodePosition(LatLng position);
+
+    void setDestinationPlace(Place place);
 }

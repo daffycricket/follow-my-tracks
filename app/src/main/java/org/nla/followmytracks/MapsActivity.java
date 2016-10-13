@@ -16,7 +16,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnItemClick;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 

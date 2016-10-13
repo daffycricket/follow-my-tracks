@@ -33,6 +33,6 @@ public class StartWorkoutModule {
             final JobManager jobManager,
             final Context context
     ) {
-        return new StartWorkoutPresenterImpl(workoutManager, view, bus, jobManager, context);
+        return new StartWorkoutPresenterImpl(workoutManager, view, bus, jobManager);
     }
 }

@@ -27,8 +27,13 @@ public class WorkoutManager {
 
     @SuppressWarnings("unused")
     @Inject
-    public WorkoutManager(final Context context, final Gson gson, final NotificationHelper notificationHelper) {
-        this.sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+    public WorkoutManager(
+            final Context context,
+            final Gson gson,
+            final NotificationHelper notificationHelper
+    ) {
+        this.sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME,
+                                                              Context.MODE_PRIVATE);
         this.gson = gson;
         this.notificationHelper = notificationHelper;
     }
@@ -56,6 +61,7 @@ public class WorkoutManager {
             workout = null;
             storeWorkoutToPrefs();
         }
+        lastLocation = null;
     }
 
     private void readWorkoutFromPrefs() {
@@ -103,7 +109,7 @@ public class WorkoutManager {
     private boolean isNewLocationToAddToWorkout(Location newLocation) {
         return workout != null && (
                 lastLocation == null ||
-                newLocation.distanceTo(lastLocation) >= workout.getMinDistanceBetweenTwoPoints()
+                        newLocation.distanceTo(lastLocation) >= workout.getMinDistanceBetweenTwoPoints()
         );
     }
 

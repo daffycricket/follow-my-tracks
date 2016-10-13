@@ -1,99 +1,102 @@
 package org.nla.followmytracks.services;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
+import org.nla.followmytracks.BuildConfig;
 import org.nla.followmytracks.FollowMyTracksApplication;
 import org.nla.followmytracks.core.WorkoutManager;
 import org.nla.followmytracks.core.common.Utils;
+import org.nla.followmytracks.core.events.GoogleApiClientConnectedEvent;
+import org.nla.followmytracks.core.events.GoogleApiClientConnectionFailedEvent;
+import org.nla.followmytracks.core.events.GoogleApiClientConnectionSuspendedEvent;
 import org.nla.followmytracks.core.events.LocationReceivedEvent;
 import org.nla.followmytracks.core.model.AppSettings;
 import org.nla.followmytracks.settings.AppSettingsManager;
 
 import javax.inject.Inject;
 
-public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class LocationService extends Service implements LocationListener {
 
     @Inject protected WorkoutManager workoutManager;
     @Inject protected AppSettingsManager appSettingsManager;
+    @Inject protected GoogleApiClient googleApiClient;
     @Inject protected Bus bus;
 
-    private GoogleApiClient googleApiClient;
-    private Location mCurrentBestLocation = null;
+    private Location currentBestLocation = null;
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
 
-	@Override
-	public void onDestroy() {
-		Log.d(Utils.getLogTag(this), "LocationService - onDestroy");
-        super.onDestroy();
-        if (googleApiClient != null) {
-            googleApiClient.disconnect();
-        }
-	}
-
     private boolean checkPermission() {
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        boolean isFineLocationGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean isCoarseLocationGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if ( Build.VERSION.SDK_INT >= 23 && !(isFineLocationGranted || isCoarseLocationGranted)) {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(Utils.getLogTag(this), "LocationService - onDestroy");
+        super.onDestroy();
+        bus.unregister(this);
+        googleApiClient.disconnect();
     }
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
         FollowMyTracksApplication.get(this).getComponent().inject(this);
-	}
+        bus.register(this);
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(Utils.getLogTag(this), "LocationService - onStart");
-
-        if (googleApiClient == null) {
-            googleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
+        Log.d(Utils.getLogTag(this), "LocationService - instance" + this.toString());
+        if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
         }
-
         return START_STICKY;
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
+    @Subscribe
+    public void onConnected(GoogleApiClientConnectedEvent event) {
         Log.d(Utils.getLogTag(this), "LocationService - connected");
         if (checkPermission()) {
-
-            mCurrentBestLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    googleApiClient);
+            currentBestLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             publishNewLocation();
 
             AppSettings appSettings = appSettingsManager.getAppSettings();
             LocationRequest locationRequest = new LocationRequest();
-            locationRequest.setInterval(appSettings.getLocationUpdateMinInterval());
-            locationRequest.setFastestInterval(appSettings.getLocationUpdateMinInterval());
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+
+            if (BuildConfig.FAST_LOCATION_UPDATES_FOR_DEBUG) {
+                locationRequest.setInterval(1000);
+            } else {
+                locationRequest.setInterval(appSettings.getLocationUpdateMinInterval());
+                locationRequest.setFastestInterval(appSettings.getLocationUpdateMinInterval());
+
+            }
 
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
                                                                      locationRequest,
@@ -101,28 +104,28 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         }
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(Utils.getLogTag(this), "LocationService - connection suspended: " + i);
+    @Subscribe
+    public void onConnectionSuspended(GoogleApiClientConnectionSuspendedEvent event) {
+        Log.d(Utils.getLogTag(this), "LocationService - connection suspended");
     }
 
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(Utils.getLogTag(this), "LocationService - connection failed: " + connectionResult.getErrorMessage());
+    @Subscribe
+    public void onConnectionFailed(GoogleApiClientConnectionFailedEvent event) {
+        Log.d(Utils.getLogTag(this), "LocationService - connection failed" + event.connectionResult.getErrorMessage());
     }
 
     @Override
     public void onLocationChanged(Location location) {
         Log.d(Utils.getLogTag(this), "LocationService - location changed");
-        mCurrentBestLocation = location;
+        currentBestLocation = location;
         publishNewLocation();
     }
 
     private void publishNewLocation() {
-        if (mCurrentBestLocation != null) {
-            workoutManager.handleNewLocation(mCurrentBestLocation);
-            bus.post(new LocationReceivedEvent(mCurrentBestLocation));
+        if (currentBestLocation != null) {
+            workoutManager.handleNewLocation(currentBestLocation);
+            bus.post(new LocationReceivedEvent(currentBestLocation));
         }
     }
 }

@@ -3,9 +3,15 @@ package org.nla.followmytracks;
 import android.app.Application;
 import android.content.Context;
 import android.location.Geocoder;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.squareup.otto.Bus;
 
@@ -14,6 +20,9 @@ import org.nla.followmytracks.core.JobManager;
 import org.nla.followmytracks.core.WorkoutManager;
 import org.nla.followmytracks.core.common.NotificationHelper;
 import org.nla.followmytracks.core.common.SmsNotifier;
+import org.nla.followmytracks.core.events.GoogleApiClientConnectedEvent;
+import org.nla.followmytracks.core.events.GoogleApiClientConnectionFailedEvent;
+import org.nla.followmytracks.core.events.GoogleApiClientConnectionSuspendedEvent;
 import org.nla.followmytracks.settings.AppSettingsManager;
 
 import java.io.File;
@@ -30,7 +39,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Module
-public class FollowMyTracksModule {
+public class FollowMyTracksModule  {
 
     private static final int OK_HTTP_CACHE_SIZE = 10 * 1024 * 1024;
 
@@ -128,6 +137,34 @@ public class FollowMyTracksModule {
                 .baseUrl(BuildConfig.GOOGLE_DIRECTIONS_API_BASE_URL)
                 .client(client)
                 .addConverterFactory(JacksonConverterFactory.create(objectMapper))
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public GoogleApiClient providesGoogleApiClient(
+            final Context context,
+            final Bus bus) {
+        return new GoogleApiClient
+                .Builder(context)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        bus.post(new GoogleApiClientConnectedEvent());
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        bus.post(new GoogleApiClientConnectionSuspendedEvent());
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        bus.post(new GoogleApiClientConnectionFailedEvent(connectionResult));
+                    }
+                })
                 .build();
     }
 }

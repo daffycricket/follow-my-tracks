@@ -1,36 +1,34 @@
 package org.nla.followmytracks.workout.start;
 
-import android.app.ActionBar.LayoutParams;
-import android.app.ProgressDialog;
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.telephony.PhoneNumberFormattingTextWatcher;
-import android.text.InputType;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 
+import org.nla.followmytracks.BuildConfig;
 import org.nla.followmytracks.R;
 import org.nla.followmytracks.core.BaseActivity;
 import org.nla.followmytracks.core.WorkoutManager;
+import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.settings.SettingsActivity;
 import org.nla.followmytracks.workout.run.WorkoutActivity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import javax.inject.Inject;
 
@@ -39,41 +37,19 @@ import butterknife.OnClick;
 
 public class StartWorkoutActivity extends BaseActivity implements StartWorkoutView {
 
-    @BindView(R.id.edtRecipient1) protected EditText mEdtRecipient1;
-    @BindView(R.id.layoutRecipients) protected ViewGroup mLayoutRecipients;
-    @BindView(R.id.txt_address) protected TextView mAddress;
-    @BindView(R.id.txt_min_distance_between_two_points) protected TextView mMinDistanceBetweenTwoPoints;
-    @BindView(R.id.scrollview) protected ScrollView scrollView;
+    private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 33;
+    private static final int PLACE_PICKER_REQUEST = 3648;
 
-	@Inject WorkoutManager workoutManager;
+    private final PlacePicker.IntentBuilder placePickerIntentbuilder = new PlacePicker.IntentBuilder();
+    protected @BindView(R.id.btn_start) Button btnStart;
+    protected @BindView(R.id.txt_recipient) EditText txtRecipient;
+    protected @BindView(R.id.txt_destination) TextView txtDestination;
+
+    protected
+    @BindView(R.id.txt_min_distance_between_two_points) TextView txtMinDistanceBetweenTwoPoints;
+    @Inject WorkoutManager workoutManager;
+
     @Inject StartWorkoutPresenter presenter;
-
-    private GoogleMap googleMap;
-	private ProgressDialog progressDialog;
-
-    @Override
-    public void startWorkout() {
-        Intent intent = new Intent(this, WorkoutActivity.class);
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
-        this.startActivity(intent);
-    }
-
-    @Override
-    public void displayReverseGeocodeError() {
-        mAddress.setText("Unable to retrieve address");
-    }
-
-    @Override
-    public void displayReverseGeocodeFoundNoAddress() {
-        mAddress.setText("No address found at this location");
-    }
-
-    @Override
-    public void displayAddress(String address) {
-        mAddress.setText(address);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,116 +82,95 @@ public class StartWorkoutActivity extends BaseActivity implements StartWorkoutVi
     }
 
     @SuppressWarnings("unused")
-    @OnClick(R.id.btn_add_recipient)
-    void onClickOnAddRecipient() {
-        EditText edtRecipient = new EditText(this);
-        edtRecipient.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        edtRecipient.setHint("06 07 08 09 10");
-        edtRecipient.setInputType(InputType.TYPE_CLASS_PHONE);
-        edtRecipient.setText("06 71 59 69 47");
-        edtRecipient.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
-        mLayoutRecipients.addView(edtRecipient);
-    }
-
-    @SuppressWarnings("unused")
-    @OnClick(R.id.btn_remove_last_recipient)
-    void onClickOnRemoveLastRecipient() {
-        if (mLayoutRecipients.getChildCount() > 1) {
-            mLayoutRecipients.removeViewAt(mLayoutRecipients.getChildCount() - 1);
-        }
-    }
-
-    @SuppressWarnings("unused")
-    @OnClick(R.id.btn_start_workout)
+    @OnClick(R.id.btn_start)
     void onClickOnStartWorkout() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Please wait...");
-        progressDialog.setMessage("Creating workout " + presenter.getWorkoutName());
-        progressDialog.setCancelable(false);
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.show();
 
-        String minDistanceAsString = TextUtils.isEmpty(mMinDistanceBetweenTwoPoints.getText())
-                        ? "500"
-                        : mMinDistanceBetweenTwoPoints.getText().toString();
+        final boolean isAccessFineLocationGranted =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED;
+        final boolean isSendSMSGranted =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                        == PackageManager.PERMISSION_GRANTED;
 
-        presenter.startWorkout(
-                listRecipients(),
-                googleMap.getCameraPosition().target.latitude,
-                googleMap.getCameraPosition().target.longitude,
-                (double)Integer.parseInt(minDistanceAsString)
-        );
+        if (! (isAccessFineLocationGranted || isSendSMSGranted)) {
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(this,
+                                              new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                              PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+        } else {
+            String minDistanceAsString = TextUtils.isEmpty(txtMinDistanceBetweenTwoPoints.getText())
+                    ? "1000"
+                    : txtMinDistanceBetweenTwoPoints.getText().toString();
+
+            presenter.startWorkout(
+                    Arrays.asList(txtRecipient.getText().toString()),
+                    (double) Integer.parseInt(minDistanceAsString)
+            );
+
+            Intent intent = new Intent(this, WorkoutActivity.class);
+            startActivity(intent);
+        }
     }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[], int[] grantResults
+    ) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // TODO : do something interesting...
+                    Log.d(Utils.getLogTag(this), "Permission granted");
+
+                } else {
+                    Log.d(Utils.getLogTag(this), "Permission not granted");
+                }
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		StartWorkoutComponent.Initializer.init(this).inject(this);
-        initUi();
-	}
-
-    private void initUi() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setActionBar(toolbar);
-        mEdtRecipient1.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
-        ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMapAsync(
-                onMapReadyCallback);
+        StartWorkoutComponent.Initializer.init(this).inject(this);
+        txtRecipient.setText(BuildConfig.DEFAULT_PHONE_NUMBER);
     }
 
     @Override
-    public void moveToPosition(LatLng latLng) {
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16), 3000, null);
-    }
-
-    private OnMapReadyCallback onMapReadyCallback = new OnMapReadyCallback() {
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            StartWorkoutActivity.this.googleMap = googleMap;
-            StartWorkoutActivity.this.onMapReady();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, this);
+                presenter.setDestinationPlace(place);
+                txtDestination.setText(place.getAddress());
+                btnStart.setEnabled(true);
+            }
         }
-    };
-
-    private void onMapReady() {
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        googleMap.getUiSettings().setZoomControlsEnabled(true);
-//        googleMap.addMarker(new MarkerOptions().position(googleMap.getCameraPosition().target));
-        googleMap.setOnCameraChangeListener(onCameraChangeListener);
-
-        ((WorkaroundMapFragment) getFragmentManager().findFragmentById(R.id.map))
-                .setListener(new WorkaroundMapFragment.OnTouchListener() {
-                    @Override
-                    public void onTouch() {
-                        scrollView.requestDisallowInterceptTouchEvent(true);
-                    }
-                });
     }
-
-    private GoogleMap.OnCameraChangeListener onCameraChangeListener = new GoogleMap.OnCameraChangeListener() {
-        @Override
-        public void onCameraChange(CameraPosition cameraPosition) {
-            presenter.reverseGeocodePosition(cameraPosition.target);
-        }
-    };
-
 
     @Override
-	protected int getLayoutResId() {
-		return R.layout.activity_start_workout;
-	}
+    protected int getLayoutResId() {
+        return R.layout.activity_test;
+    }
 
-	private void openSettings() {
-		Intent intent = new Intent(this, SettingsActivity.class);
-		this.startActivity(intent);
-	}
+    @OnClick(R.id.txt_destination)
+    protected void onClickOnPickDestination() {
+        try {
+            startActivityForResult(placePickerIntentbuilder.build(this), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+    }
 
-	private List<String> listRecipients() {
-		List<String> recepients = new ArrayList<>();
-		for (int i = 0; i < mLayoutRecipients.getChildCount(); ++i) {
-			EditText edtRecipient = (EditText) mLayoutRecipients.getChildAt(i);
-			String phoneNumber = edtRecipient.getText().toString();
-			recepients.add(phoneNumber.trim());
-		}
-		return recepients;
-	}
+    private void openSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        this.startActivity(intent);
+    }
 }

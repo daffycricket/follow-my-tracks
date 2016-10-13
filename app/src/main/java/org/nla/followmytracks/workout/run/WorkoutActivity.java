@@ -1,12 +1,17 @@
 package org.nla.followmytracks.workout.run;
 
+import android.Manifest;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,11 +20,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.nla.followmytracks.R;
 import org.nla.followmytracks.core.BaseActivity;
+import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.core.model.AppSettings;
 import org.nla.followmytracks.core.model.Workout;
 import org.nla.followmytracks.core.model.WorkoutPoint;
@@ -36,23 +43,25 @@ import butterknife.OnClick;
 
 public class WorkoutActivity extends BaseActivity implements WorkoutView, OnMapReadyCallback {
 
+    private static final int PERMISSION_REQUEST_SEND_SMS = 44;
     private static final SimpleDateFormat DATE_FORMATER = new SimpleDateFormat("hh:mm:ss",
                                                                                Locale.FRANCE);
-    private static final int NOTIFICATION_ID = 42329494;
 
+    private static final int NOTIFICATION_ID = 42329494;
     @BindView(R.id.btn_start_stop_geo) protected Button btnStartStop;
     @BindView(R.id.txt_points) protected TextView txtPoints;
     @BindView(R.id.txt_time) protected TextView txtTime;
     @BindView(R.id.txt_min_distance) protected TextView txtMinDistance;
     @BindView(R.id.txt_min_interval) protected TextView txtMinInterval;
     @Inject protected WorkoutPresenter workoutPresenter;
-    @Inject protected AppSettingsManager appSettingsManager;
 
+    @Inject protected AppSettingsManager appSettingsManager;
     private GoogleMap googleMap;
     private Handler mCustomHandler = new Handler();
     private Intent mLocationServiceIntent;
     private long mStartTime = 0L;
     private long mTimeInMilliseconds = 0L;
+
     private long mUpdatedTime = 0L;
 
     private Runnable mUpdateTimerThread = new Runnable() {
@@ -193,7 +202,40 @@ public class WorkoutActivity extends BaseActivity implements WorkoutView, OnMapR
     @SuppressWarnings("unused")
     @OnClick(R.id.btn_start_stop_geo)
     protected void onClickOnStartStopButton() {
-        workoutPresenter.startStop();
+
+
+        final boolean isSendSMSGranted =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        if (!isSendSMSGranted) {
+            ActivityCompat.requestPermissions(this,
+                                              new String[]{Manifest.permission.SEND_SMS},
+                                              PERMISSION_REQUEST_SEND_SMS);
+        } else {
+            workoutPresenter.startStop();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[], int[] grantResults
+    ) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_SEND_SMS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // TODO : do something interesting...
+                    Log.d(Utils.getLogTag(this), "Permission granted");
+
+                } else {
+                    Log.d(Utils.getLogTag(this), "Permission not granted");
+                }
+                return;
+            }
+        }
     }
 
     private void startLocationService() {
@@ -208,8 +250,11 @@ public class WorkoutActivity extends BaseActivity implements WorkoutView, OnMapR
     }
 
     private void moveToPosition(LatLng latLng) {
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(16), 3000, null);
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(latLng)      // Sets the center of the map to Mountain View
+                .zoom(16)                   // Sets the zoom
+                .build();                   // Creates a CameraPosition from the builder
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1500, null);
     }
 
     private void restoreWorkoutInProgress(Workout workout) {

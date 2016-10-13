@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingBottom="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="20dp">
+
+    <EditText
+        android:id="@+id/txt_recipient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:hint="06 07 08 09 10"
+        android:inputType="phone"
+        android:text="07 81 24 89 51"
+        android:layout_marginTop="11dp"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentStart="true"
+        android:textAlignment="center">
+    </EditText>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Destination"
+        android:id="@+id/textView3"
+        android:layout_below="@+id/txt_recipient"
+        android:layout_alignParentStart="true"/>
+
+
+    <!--<EditText-->
+        <!--android:id="@+id/txtDestination"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="2"-->
+        <!--android:inputType="none"-->
+        <!--android:clickable="true"-->
+        <!--android:text="Click to pick destination"-->
+        <!--android:layout_marginTop="11dp"-->
+        <!--android:layout_below="@+id/textView3"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:textAlignment="center"-->
+        <!--android:editable="false">-->
+    <!--</EditText>-->
+
+    <EditText
+        android:id="@+id/txt_min_distance_between_two_points"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="1000"
+        android:inputType="number"
+        android:layout_marginTop="17dp"
+        android:layout_below="@+id/textView4"
+        android:layout_alignParentStart="true"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:text="Recipient(s)"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:id="@+id/textView2"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="33dp"
+        android:text="Distance minimum entre chaque notification"
+        android:id="@+id/textView4"
+        android:layout_below="@+id/txt_destination"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:id="@+id/txt_destination"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:clickable="true"
+        android:inputType="textMultiLine"
+        android:text="Click to pick destination"
+        android:layout_marginTop="15dp"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textColor="?attr/editTextColor"
+        android:layout_below="@+id/textView3"
+        android:layout_alignParentStart="true">
+    </TextView>
+
+    <Button
+        android:layout_gravity="center"
+        android:id="@+id/btn_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="60dp"
+        android:text="Start"
+        android:layout_below="@+id/txt_min_distance_between_two_points"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:enabled="false"/>
+
+</RelativeLayout>

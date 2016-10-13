@@ -43,6 +43,7 @@ public class WorkoutPresenterImpl implements WorkoutPresenter {
     @Subscribe
     public void onReceivedNewLocation(LocationReceivedEvent currentLocationReceivedEvent) {
         Location currentLocation = currentLocationReceivedEvent.location;
+
         if (workoutManager.getWorkout().isInProgress()) {
             view.pinWorkoutMarkers(workout);
         }
