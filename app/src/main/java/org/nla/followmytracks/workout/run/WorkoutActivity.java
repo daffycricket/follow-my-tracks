@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -60,18 +61,15 @@ public class WorkoutActivity extends BaseActivity implements WorkoutView, OnMapR
     private Handler mCustomHandler = new Handler();
     private Intent mLocationServiceIntent;
     private long mStartTime = 0L;
-    private long mTimeInMilliseconds = 0L;
-
-    private long mUpdatedTime = 0L;
 
     private Runnable mUpdateTimerThread = new Runnable() {
 
         @Override
         public void run() {
-            mTimeInMilliseconds = System.currentTimeMillis() - mStartTime;
-            mUpdatedTime = mTimeInMilliseconds;
+            long timeInMilliseconds = System.currentTimeMillis() - mStartTime;
+            long updatedTime = timeInMilliseconds;
 
-            int secs = (int) (mUpdatedTime / 1000);
+            int secs = (int) (updatedTime / 1000);
             int mins = secs / 60;
             secs = secs % 60;
             // int milliseconds = (int) (mUpdatedTime % 1000);
@@ -220,7 +218,7 @@ public class WorkoutActivity extends BaseActivity implements WorkoutView, OnMapR
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
-            String permissions[], int[] grantResults
+            @NonNull String permissions[], @NonNull int[] grantResults
     ) {
         switch (requestCode) {
             case PERMISSION_REQUEST_SEND_SMS: {
@@ -233,7 +231,6 @@ public class WorkoutActivity extends BaseActivity implements WorkoutView, OnMapR
                 } else {
                     Log.d(Utils.getLogTag(this), "Permission not granted");
                 }
-                return;
             }
         }
     }

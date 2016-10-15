@@ -2,7 +2,6 @@ package org.nla.followmytracks;
 
 import android.app.Application;
 import android.content.Context;
-import android.location.Geocoder;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
@@ -15,7 +14,6 @@ import org.nla.followmytracks.settings.AppSettingsManager;
 import org.nla.followmytracks.settings.SettingsActivity;
 import org.nla.followmytracks.workout.run.NewLocationNotificationRunnable;
 import org.nla.followmytracks.workout.start.CreateWorkoutRunnable;
-import org.nla.followmytracks.workout.start.ReverseGeocodeLocationRunnable;
 
 import javax.inject.Singleton;
 
@@ -27,23 +25,7 @@ import dagger.Component;
 )
 public interface FollowMyTracksComponent {
 
-    final class Initializer {
-
-        static FollowMyTracksComponent init(final FollowMyTracksApplication app) {
-            return DaggerFollowMyTracksComponent
-                    .builder()
-                    .followMyTracksModule(new FollowMyTracksModule(app))
-                    .build();
-        }
-
-
-        private Initializer() {
-            // static class
-        }
-    }
-
     void inject(FollowMyTracksApplication followMyTracksApplication);
-    void inject(MapsActivity mainActivity);
 
     void inject(SettingsActivity settingsActivity);
 
@@ -52,8 +34,6 @@ public interface FollowMyTracksComponent {
     void inject(CreateWorkoutRunnable createWorkoutRunnable);
 
     void inject(NewLocationNotificationRunnable newLocationNotificationRunnable);
-
-    void inject(ReverseGeocodeLocationRunnable reverseGeocodeLocationRunnable);
 
     Application application();
 
@@ -67,9 +47,21 @@ public interface FollowMyTracksComponent {
 
     Gson gson();
 
-    Geocoder geocoder();
-
     Context context();
 
     GoogleApiClient googleApiClient();
+
+    final class Initializer {
+
+        private Initializer() {
+            // static class
+        }
+
+        static FollowMyTracksComponent init(final FollowMyTracksApplication app) {
+            return DaggerFollowMyTracksComponent
+                    .builder()
+                    .followMyTracksModule(new FollowMyTracksModule(app))
+                    .build();
+        }
+    }
 }

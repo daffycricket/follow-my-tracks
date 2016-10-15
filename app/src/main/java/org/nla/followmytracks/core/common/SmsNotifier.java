@@ -16,13 +16,24 @@ public class SmsNotifier {
         this.context = context;
     }
 
-    public void notify(String phoneNumber, boolean isStartSms, String distance, String remainingTime, String origin) {
+    public void notify(
+            String phoneNumber,
+            boolean isStartSms,
+            String distance,
+            String remainingTime,
+            String origin
+    ) {
         String message = buildMessage(isStartSms, distance, remainingTime, origin);
         SmsManager smsManager = SmsManager.getDefault();
-		smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-	}
+        smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+    }
 
-    private String buildMessage(boolean isStartSms, String distance, String remainingTime, String origin) {
+    private String buildMessage(
+            boolean isStartSms,
+            String distance,
+            String remainingTime,
+            String origin
+    ) {
         String message;
         if (isStartSms) {
             message = buildStartMessage(distance, remainingTime, origin);
@@ -34,10 +45,16 @@ public class SmsNotifier {
     }
 
     private String buildStartMessage(String distance, String remainingTime, String origin) {
-        return context.getString(R.string.sms_start_distance_interval, distance, remainingTime, origin);
+        return context.getString(R.string.sms_start_distance_interval,
+                                 distance,
+                                 remainingTime,
+                                 origin);
     }
 
     private String buildUpdateMessage(String distance, String remainingTime, String origin) {
-        return context.getString(R.string.sms_update_distance_interval, distance, remainingTime, origin);
+        return context.getString(R.string.sms_update_distance_interval,
+                                 distance,
+                                 remainingTime,
+                                 origin);
     }
 }

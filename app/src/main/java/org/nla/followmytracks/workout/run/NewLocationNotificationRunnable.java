@@ -1,6 +1,5 @@
 package org.nla.followmytracks.workout.run;
 
-import android.location.Geocoder;
 import android.util.Log;
 
 import org.nla.followmytracks.FollowMyTracksComponent;
@@ -24,30 +23,21 @@ import retrofit2.http.Query;
 public class NewLocationNotificationRunnable extends JobManager.PriorityRunnable {
 
     private static final int MAX_ADDRESS_RESULT = 1;
+    @Inject WorkoutManager workoutManager;
+    @Inject Retrofit retrofit;
+    @Inject SmsNotifier smsNotifier;
     private String distance;
     private String remainingTime;
     private String origin;
-
-    interface Service {
-
-        @GET("/maps/api/directions/json")
-        Call<Direction> getRoute(
-                @Query("origin") final String origin,
-                @Query("destination") final String destination
-        );
-    }
-
-	@Inject WorkoutManager workoutManager;
-    @Inject Geocoder geocoder;
-    @Inject Retrofit retrofit;
-    @Inject SmsNotifier smsNotifier;
-
     private boolean isStartNotification;
 
-    public NewLocationNotificationRunnable(JobManager.Priority priority, final boolean isStartNotification) {
-		super(priority);
+    public NewLocationNotificationRunnable(
+            JobManager.Priority priority,
+            final boolean isStartNotification
+    ) {
+        super(priority);
         this.isStartNotification = isStartNotification;
-	}
+    }
 
     @Override
     public void inject(final FollowMyTracksComponent component) {
@@ -67,6 +57,7 @@ public class NewLocationNotificationRunnable extends JobManager.PriorityRunnable
     private void identifyRemainingTimeAndDistance() {
         Workout workout = workoutManager.getWorkout();
         WorkoutPoint workoutPoint = workout.getLastPoint();
+        // TODO Check null value
         origin = workoutPoint.getLatitude() + "," + workoutPoint.getLongitude();
         String destination = workout.getLatitude() + "," + workout.getLongitude();
 
@@ -74,41 +65,31 @@ public class NewLocationNotificationRunnable extends JobManager.PriorityRunnable
         boolean success = false;
         try {
             direction = retrofit.create(Service.class)
-                           .getRoute(origin, destination)
-                           .execute()
-                           .body();
+                                .getRoute(origin, destination)
+                                .execute()
+                                .body();
             success = true;
         } catch (IOException e) {
             Log.e(Utils.getLogTag(this), e.getMessage());
         }
 
         if (success) {
-            remainingTime = direction.getRouteList().get(0).getLegList().get(0).getDuration().text();
+            remainingTime = direction.getRouteList()
+                                     .get(0)
+                                     .getLegList()
+                                     .get(0)
+                                     .getDuration()
+                                     .text();
             distance = direction.getRouteList().get(0).getLegList().get(0).getDistance().text();
         }
     }
 
-//    @Nullable
-//    private String identifyCurrentAddress() {
-//        WorkoutPoint lastLocation = workoutManager.getWorkout().getLastPoint();
-//        List<Address> addresses = null;
-//        boolean success = false;
-//        String toReturn = null;
-//        try {
-//            addresses = geocoder.getFromLocation(lastLocation.getLatitude(),
-//                                                 lastLocation.getLongitude(),
-//                                                 MAX_ADDRESS_RESULT);
-//            success = true;
-//        } catch (Exception e) {
-//            Log.e(Utils.getLogTag(this), e.toString());
-//        }
-//
-//        if (success) {
-//            if (addresses != null && addresses.size() != 0) {
-//                toReturn = Utils.transformAddressToSingleLine(addresses.get(0));
-//            }
-//        }
-//
-//        return toReturn;
-//    }
+    interface Service {
+
+        @GET("/maps/api/directions/json")
+        Call<Direction> getRoute(
+                @Query("origin") final String origin,
+                @Query("destination") final String destination
+        );
+    }
 }

@@ -48,10 +48,7 @@ public class LocationService extends Service implements LocationListener {
         boolean isFineLocationGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         boolean isCoarseLocationGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
-        if ( Build.VERSION.SDK_INT >= 23 && !(isFineLocationGranted || isCoarseLocationGranted)) {
-            return false;
-        }
-        return true;
+        return !(Build.VERSION.SDK_INT >= 23 && !(isFineLocationGranted || isCoarseLocationGranted));
     }
 
     @Override
@@ -88,7 +85,7 @@ public class LocationService extends Service implements LocationListener {
 
             AppSettings appSettings = appSettingsManager.getAppSettings();
             LocationRequest locationRequest = new LocationRequest();
-            locationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
             if (BuildConfig.FAST_LOCATION_UPDATES_FOR_DEBUG) {
                 locationRequest.setInterval(1000);

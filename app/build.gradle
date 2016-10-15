@@ -19,9 +19,9 @@ android {
         multiDexEnabled true
         resValue "string", "app_name", "Follow my tracks"
         buildConfigField "String", "GOOGLE_DIRECTIONS_API_BASE_URL", "\"https://maps.googleapis.com/\"";
-        buildConfigField "Boolean", "FAST_LOCATION_UPDATES_FOR_DEBUG", "true";
-        //buildConfigField "String", "DEFAULT_PHONE_NUMBER", "\"07 81 24 89 51\"";
-        buildConfigField "String", "DEFAULT_PHONE_NUMBER", "\"06 65 10 11 45\"";
+        buildConfigField "Boolean", "FAST_LOCATION_UPDATES_FOR_DEBUG", "false";
+        buildConfigField "String", "DEFAULT_PHONE_NUMBER", "\"07 81 24 89 51\"";
+//        buildConfigField "String", "DEFAULT_PHONE_NUMBER", "\"06 65 10 11 45\"";
     }
     buildTypes {
         debug {
@@ -50,7 +50,7 @@ dependencies {
     def retrofitVersion = "2.1.0"
     compile fileTree(dir: 'libs', include: ['*.jar'])
     provided 'javax.annotation:jsr250-api:1.0'
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.google.android.gms:play-services:9.6.0'
     compile 'com.jakewharton:butterknife:8.4.0'
@@ -70,7 +70,12 @@ dependencies {
         transitive = true;
     }
     testCompile 'junit:junit:4.12'
+    testCompile 'org.assertj:assertj-core:3.5.2'
+    testCompile('com.squareup.assertj:assertj-android:1.1.1', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    androidTestCompile 'com.android.support:support-annotations:24.2.1'
 }

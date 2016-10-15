@@ -2,6 +2,7 @@ package org.nla.followmytracks.workout.start;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,8 +20,10 @@ public class WorkaroundMapFragment extends MapFragment {
 
         TouchableWrapper frameLayout = new TouchableWrapper(getActivity());
 
-        frameLayout.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        frameLayout.setBackgroundColor(ContextCompat.getColor(this.getContext(),
+                                                              android.R.color.transparent));
 
+        // TODO Check null value returned
         ((ViewGroup) layout).addView(frameLayout,
                                      new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 

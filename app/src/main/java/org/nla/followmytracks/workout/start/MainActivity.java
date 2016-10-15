@@ -1,26 +1,5 @@
 package org.nla.followmytracks.workout.start;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlacePicker;
-
-import org.nla.followmytracks.R;
-import org.nla.followmytracks.core.BaseActivity;
-
-import butterknife.BindView;
-import butterknife.OnClick;
-
 public class MainActivity
 //        extends BaseActivity
 {

@@ -15,7 +15,15 @@ public class Utils {
     }
 
     public static String buildRandomName() {
-        final String[] POTENTIAL_NAMES = new String[] { "Mizuno", "Brooks", "Nike", "Adadas", "Asics", "Diadora", "Saucony" };
+        final String[] POTENTIAL_NAMES = new String[]{
+                "Mizuno",
+                "Brooks",
+                "Nike",
+                "Adadas",
+                "Asics",
+                "Diadora",
+                "Saucony"
+        };
 
         Random random = new Random();
         return POTENTIAL_NAMES[random.nextInt(POTENTIAL_NAMES.length)] + " " + random.nextInt(500);
@@ -27,7 +35,7 @@ public class Utils {
 
     public static String transformAddressToSingleLine(Address address) {
         List<String> addressFragments = new ArrayList<>();
-        for(int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+        for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
             addressFragments.add(address.getAddressLine(i));
         }
         return TextUtils.join(System.getProperty("line.separator"), addressFragments);

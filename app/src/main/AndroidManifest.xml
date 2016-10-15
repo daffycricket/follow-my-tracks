@@ -2,11 +2,6 @@
 <manifest package="org.nla.followmytracks"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality. 
-    -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -30,23 +25,6 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="dd38dd735f1aa5146e772a3cb865d52c335cf248"/>
-
-        <activity
-            android:name="org.nla.followmytracks.MapsActivity"
-            android:label="@string/title_activity_maps">
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN"/>-->
-            <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-            <!--</intent-filter>-->
-        </activity>
-        <!--<activity-->
-            <!--android:name="org.nla.followmytracks.workout.start.MainActivity"-->
-            <!--android:label="@string/title_activity_maps">-->
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN"/>-->
-            <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-            <!--</intent-filter>-->
-        <!--</activity>-->
 
         <activity
             android:name=".workout.start.StartWorkoutActivity"

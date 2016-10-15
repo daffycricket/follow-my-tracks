@@ -2,7 +2,6 @@ package org.nla.followmytracks;
 
 import android.app.Application;
 import android.content.Context;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,7 +25,6 @@ import org.nla.followmytracks.core.events.GoogleApiClientConnectionSuspendedEven
 import org.nla.followmytracks.settings.AppSettingsManager;
 
 import java.io.File;
-import java.util.Locale;
 
 import javax.inject.Singleton;
 
@@ -63,14 +61,6 @@ public class FollowMyTracksModule  {
 
     @Provides
     @Singleton
-    public Geocoder providesGeocoder(
-            final Context context
-    ) {
-        return new Geocoder(context, Locale.getDefault());
-    }
-
-    @Provides
-    @Singleton
     public Bus providesBus() {
         return new AndroidBus();
     }
@@ -92,10 +82,9 @@ public class FollowMyTracksModule  {
     @Provides
     @Singleton
     public NotificationHelper providesNotificationHelper(
-            final Context context,
             final JobManager jobManager
     ) {
-        return new NotificationHelper(context, jobManager);
+        return new NotificationHelper(jobManager);
     }
 
 

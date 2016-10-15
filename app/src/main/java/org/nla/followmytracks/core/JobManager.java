@@ -31,19 +31,12 @@ public class JobManager {
     private static final long KEEP_ALIVE_TIME_SECOND = 60L;
     private static final int INITIAL_CAPACITY_QUEUE = 50;
 
-    private final FollowMyTracksApplication followMeApplication;
+    private final FollowMyTracksApplication followMyTracksApplication;
     private final ThreadPoolExecutor threadPoolExecutor;
 
-    public enum Priority {
-        LOW,
-        NORMAL,
-        HIGH,
-        IMMEDIATE
-    }
-
     @Inject
-    public JobManager(Application followMeApplication) {
-        this.followMeApplication = (FollowMyTracksApplication) followMeApplication;
+    public JobManager(Application followMyTracksApplication) {
+        this.followMyTracksApplication = (FollowMyTracksApplication) followMyTracksApplication;
         this.threadPoolExecutor = new PriorityExecutor(
                 CORE_POOL_SIZE,
                 MAXIMUM_POOL_SIZE,
@@ -55,18 +48,18 @@ public class JobManager {
 
     public <T> Future<T> submitCallable(final Callable<T> callable) {
         if (callable instanceof PriorityRunnable) {
-            ((PriorityRunnable) callable).inject(followMeApplication.getComponent());
+            ((PriorityRunnable) callable).inject(followMyTracksApplication.getComponent());
         }
         return threadPoolExecutor.submit(callable);
     }
 
     public Future submitRunnable(final PriorityRunnable runnable) {
-        runnable.inject(followMeApplication.getComponent());
+        runnable.inject(followMyTracksApplication.getComponent());
         return threadPoolExecutor.submit(runnable);
     }
 
     public void execute(final PriorityRunnable runnable) {
-        runnable.inject(followMeApplication.getComponent());
+        runnable.inject(followMyTracksApplication.getComponent());
         threadPoolExecutor.execute(runnable);
     }
 
@@ -75,11 +68,25 @@ public class JobManager {
         execute((PriorityRunnable) runnable);
     }
 
+    public enum Priority {
+        LOW,
+        NORMAL,
+        HIGH,
+        IMMEDIATE
+    }
+
     /**
      * The {@link JobManager} sort those runnable in a priority queue as they are coming.
      */
     public interface Prioritable {
         Priority getPriority();
+    }
+
+    /**
+     * Runnable that is part of a {@link ChainedPriorityRunnable}.
+     */
+    public interface QueuedRunnable<T> {
+        QueuedRunnable<T> configureRunnable(T object);
     }
 
     private static class PriorityFutureTask<T> extends FutureTask<T>
@@ -170,13 +177,6 @@ public class JobManager {
         }
     }
 
-    /**
-     * Runnable that is part of a {@link ChainedPriorityRunnable}.
-     */
-    public interface QueuedRunnable<T> {
-        QueuedRunnable<T> configureRunnable(T object);
-    }
-
     @VisibleForTesting
     static class JobEntryComparator
             implements java.util.Comparator<Runnable>, Serializable {
@@ -226,6 +226,16 @@ public class JobManager {
                   jobThreadFactory);
         }
 
+        private static Priority getPriority(Object object) {
+            final Priority priority;
+            if (object instanceof Prioritable) {
+                priority = ((Prioritable) object).getPriority();
+            } else {
+                priority = Priority.LOW;
+            }
+            return priority;
+        }
+
         @NonNull
         @Override
         public <T> Future<T> submit(Callable<T> task) {
@@ -261,16 +271,6 @@ public class JobManager {
                                                                         null);
             super.execute(ftask);
             return ftask;
-        }
-
-        private static Priority getPriority(Object object) {
-            final Priority priority;
-            if (object instanceof Prioritable) {
-                priority = ((Prioritable) object).getPriority();
-            } else {
-                priority = Priority.LOW;
-            }
-            return priority;
         }
 
     }

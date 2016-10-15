@@ -1,7 +1,5 @@
 package org.nla.followmytracks.workout.start;
 
-import android.content.Context;
-
 import com.google.android.gms.location.places.Place;
 import com.squareup.otto.Bus;
 

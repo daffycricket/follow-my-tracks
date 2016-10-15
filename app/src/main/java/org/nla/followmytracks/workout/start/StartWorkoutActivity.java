@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -92,7 +93,7 @@ public class StartWorkoutActivity extends BaseActivity implements StartWorkoutVi
                 ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                         == PackageManager.PERMISSION_GRANTED;
 
-        if (! (isAccessFineLocationGranted || isSendSMSGranted)) {
+        if (!(isAccessFineLocationGranted || isSendSMSGranted)) {
             // No explanation needed, we can request the permission.
 
             ActivityCompat.requestPermissions(this,
@@ -116,7 +117,7 @@ public class StartWorkoutActivity extends BaseActivity implements StartWorkoutVi
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
-            String permissions[], int[] grantResults
+            @NonNull String permissions[], @NonNull int[] grantResults
     ) {
         switch (requestCode) {
             case PERMISSION_REQUEST_ACCESS_FINE_LOCATION: {
@@ -129,7 +130,6 @@ public class StartWorkoutActivity extends BaseActivity implements StartWorkoutVi
                 } else {
                     Log.d(Utils.getLogTag(this), "Permission not granted");
                 }
-                return;
             }
         }
     }
@@ -145,7 +145,7 @@ public class StartWorkoutActivity extends BaseActivity implements StartWorkoutVi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(data, this);
+                Place place = PlacePicker.getPlace(this, data);
                 presenter.setDestinationPlace(place);
                 txtDestination.setText(place.getAddress());
                 btnStart.setEnabled(true);
@@ -162,9 +162,7 @@ public class StartWorkoutActivity extends BaseActivity implements StartWorkoutVi
     protected void onClickOnPickDestination() {
         try {
             startActivityForResult(placePickerIntentbuilder.build(this), PLACE_PICKER_REQUEST);
-        } catch (GooglePlayServicesRepairableException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesNotAvailableException e) {
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
             e.printStackTrace();
         }
     }
