@@ -3,7 +3,6 @@ package org.nla.followmytracks.core.common;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nla.followmytracks.BuildConfig;
-import org.nla.followmytracks.common.Utils;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -12,6 +11,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23)
 public class UtilsTest {
+
+    @Test
+    public void buildRandomName() throws Exception {
+        final String name = Utils.buildRandomName();
+
+        boolean nameStartsWithACorrectRoot = false;
+        for (String root : Utils.POTENTIAL_NAMES) {
+            if (name.startsWith(root)) {
+                nameStartsWithACorrectRoot = true;
+                break;
+            }
+        }
+
+        assertThat(nameStartsWithACorrectRoot).isTrue();
+    }
 
     @Test
     public void GetLogTag_WhenObjectIsNull() {

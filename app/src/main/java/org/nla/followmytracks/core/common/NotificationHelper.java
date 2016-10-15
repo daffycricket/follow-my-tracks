@@ -1,4 +1,4 @@
-package org.nla.followmytracks.common;
+package org.nla.followmytracks.core.common;
 
 import org.nla.followmytracks.core.JobManager;
 import org.nla.followmytracks.workout.run.NewLocationNotificationRunnable;

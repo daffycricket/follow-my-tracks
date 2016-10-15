@@ -6,7 +6,7 @@ import android.location.Location;
 
 import com.google.gson.Gson;
 
-import org.nla.followmytracks.common.NotificationHelper;
+import org.nla.followmytracks.core.common.NotificationHelper;
 import org.nla.followmytracks.core.model.Workout;
 import org.nla.followmytracks.core.model.WorkoutPoint;
 

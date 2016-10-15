@@ -3,9 +3,9 @@ package org.nla.followmytracks.workout.start;
 import com.google.android.gms.location.places.Place;
 import com.squareup.otto.Bus;
 
-import org.nla.followmytracks.common.Utils;
 import org.nla.followmytracks.core.JobManager;
 import org.nla.followmytracks.core.WorkoutManager;
+import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.core.model.Workout;
 
 import java.util.ArrayList;

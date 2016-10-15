@@ -23,9 +23,9 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 
 import org.nla.followmytracks.BuildConfig;
 import org.nla.followmytracks.R;
-import org.nla.followmytracks.common.Utils;
 import org.nla.followmytracks.core.BaseActivity;
 import org.nla.followmytracks.core.WorkoutManager;
+import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.settings.SettingsActivity;
 import org.nla.followmytracks.workout.run.WorkoutActivity;
 

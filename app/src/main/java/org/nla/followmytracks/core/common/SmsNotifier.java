@@ -1,4 +1,4 @@
-package org.nla.followmytracks.common;
+package org.nla.followmytracks.core.common;
 
 import android.content.Context;
 import android.telephony.SmsManager;

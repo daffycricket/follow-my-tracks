@@ -14,11 +14,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.squareup.otto.Bus;
 
-import org.nla.followmytracks.common.NotificationHelper;
-import org.nla.followmytracks.common.SmsNotifier;
 import org.nla.followmytracks.core.AndroidBus;
 import org.nla.followmytracks.core.JobManager;
 import org.nla.followmytracks.core.WorkoutManager;
+import org.nla.followmytracks.core.common.NotificationHelper;
+import org.nla.followmytracks.core.common.SmsNotifier;
 import org.nla.followmytracks.core.events.GoogleApiClientConnectedEvent;
 import org.nla.followmytracks.core.events.GoogleApiClientConnectionFailedEvent;
 import org.nla.followmytracks.core.events.GoogleApiClientConnectionSuspendedEvent;
