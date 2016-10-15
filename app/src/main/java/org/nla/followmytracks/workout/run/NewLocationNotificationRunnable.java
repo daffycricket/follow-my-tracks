@@ -3,10 +3,10 @@ package org.nla.followmytracks.workout.run;
 import android.util.Log;
 
 import org.nla.followmytracks.FollowMyTracksComponent;
+import org.nla.followmytracks.common.SmsNotifier;
+import org.nla.followmytracks.common.Utils;
 import org.nla.followmytracks.core.JobManager;
 import org.nla.followmytracks.core.WorkoutManager;
-import org.nla.followmytracks.core.common.SmsNotifier;
-import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.core.model.Workout;
 import org.nla.followmytracks.core.model.WorkoutPoint;
 import org.nla.followmytracks.workout.run.model.Direction;

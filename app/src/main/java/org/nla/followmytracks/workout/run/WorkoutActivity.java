@@ -26,8 +26,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.nla.followmytracks.R;
+import org.nla.followmytracks.common.Utils;
 import org.nla.followmytracks.core.BaseActivity;
-import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.core.model.AppSettings;
 import org.nla.followmytracks.core.model.Workout;
 import org.nla.followmytracks.core.model.WorkoutPoint;

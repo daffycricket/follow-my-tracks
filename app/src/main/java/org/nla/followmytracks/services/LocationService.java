@@ -19,8 +19,8 @@ import com.squareup.otto.Subscribe;
 
 import org.nla.followmytracks.BuildConfig;
 import org.nla.followmytracks.FollowMyTracksApplication;
+import org.nla.followmytracks.common.Utils;
 import org.nla.followmytracks.core.WorkoutManager;
-import org.nla.followmytracks.core.common.Utils;
 import org.nla.followmytracks.core.events.GoogleApiClientConnectedEvent;
 import org.nla.followmytracks.core.events.GoogleApiClientConnectionFailedEvent;
 import org.nla.followmytracks.core.events.GoogleApiClientConnectionSuspendedEvent;

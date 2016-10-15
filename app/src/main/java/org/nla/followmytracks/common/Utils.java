@@ -1,4 +1,4 @@
-package org.nla.followmytracks.core.common;
+package org.nla.followmytracks.common;
 
 import android.location.Address;
 import android.text.TextUtils;
@@ -30,7 +30,7 @@ public class Utils {
     }
 
     public static String getLogTag(Object o) {
-        return LOGTAG + (o == null ? null : o.getClass().getSimpleName());
+        return LOGTAG + (o == null ? "" : " " + o.getClass().getSimpleName());
     }
 
     public static String transformAddressToSingleLine(Address address) {

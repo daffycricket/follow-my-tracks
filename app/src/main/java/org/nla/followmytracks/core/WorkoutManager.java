@@ -6,7 +6,7 @@ import android.location.Location;
 
 import com.google.gson.Gson;
 
-import org.nla.followmytracks.core.common.NotificationHelper;
+import org.nla.followmytracks.common.NotificationHelper;
 import org.nla.followmytracks.core.model.Workout;
 import org.nla.followmytracks.core.model.WorkoutPoint;
 
@@ -38,6 +38,13 @@ public class WorkoutManager {
         this.notificationHelper = notificationHelper;
     }
 
+    public Workout getWorkout() {
+        if (workout == null) {
+            readWorkoutFromPrefs();
+        }
+        return workout;
+    }
+
     public void setWorkout(final Workout workout) {
         if (workout == null) {
             throw new IllegalArgumentException("workout is null");
@@ -46,13 +53,6 @@ public class WorkoutManager {
             this.workout = workout;
             storeWorkoutToPrefs();
         }
-    }
-
-    public Workout getWorkout() {
-        if (workout == null) {
-            readWorkoutFromPrefs();
-        }
-        return workout;
     }
 
     public void clearWorkout() {
