@@ -6,5 +6,5 @@
         android:key="pref_location_update_min_interval"
         android:title="Intervalle de rafrachaichissement de la localisation géographique"
         android:defaultValue="30000" />
-    
+
 </PreferenceScreen>
